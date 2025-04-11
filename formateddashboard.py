@@ -7,9 +7,7 @@ st.title("📊 Enrollment Data Dashboard")
 # Use tabs to split functionality
 tab1, tab2 = st.tabs(["Upload Data", "Search Open Sections"])
 
-# -------------------
-# Tab 1: Upload and Clean Data
-# -------------------
+
 with tab1:
     st.header("Upload Enrollment Data")
     uploaded_file = st.file_uploader("Upload a CSV File", type=["csv"])
@@ -44,9 +42,7 @@ with tab1:
         except Exception as e:
             st.error(f"Error processing the file: {e}")
 
-# -------------------
-# Tab 2: Search Open Sections
-# -------------------
+
 with tab2:
     st.header("Find Open Course Sections")
 

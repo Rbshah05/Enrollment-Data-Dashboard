@@ -29,7 +29,7 @@ with tab1:
                 deduped_df = df.drop_duplicates(subset='SOC Class Nbr', keep='first').copy()
                 final_df = pd.merge(deduped_df.drop(columns=['Name']), merged_names, on='SOC Class Nbr')
 
-                st.subheader("📄 Preview of Cleaned Data")
+                st.subheader("Preview of Cleaned Data")
                 st.dataframe(final_df, use_container_width=True)
 
                 # Make CSV downloadable
@@ -51,7 +51,6 @@ with tab2:
     if final_df is None:
         st.warning("Please upload a CSV file in the first tab.")
     else:
-        # Check for necessary columns
         required_search_cols = {'Subject', 'Num', 'Tot Enrl', 'Enr Cpcty', 'Descr', 'Begin Time', 'End Time'}
         if not required_search_cols.issubset(final_df.columns):
             st.error(f"Uploaded CSV must include these columns: {', '.join(required_search_cols)}")
@@ -93,3 +92,23 @@ with tab2:
                                     st.markdown(f"**Enrollment Capacity:** {row.get('Enr Cpcty', 'N/A')}")
                     else:
                         st.warning("No open sections found for this course.")
+
+                    # ----------- Enrollment by Campus Section ------------
+                    if 'Location' in course_df.columns:
+                        st.markdown("### 📍 Enrollment by Campus (Location)")
+
+                        # Clean numeric enrollment values
+                        course_df['Tot Enrl'] = pd.to_numeric(course_df['Tot Enrl'], errors='coerce')
+
+                        enrollment_by_location = (
+                            course_df.groupby('Location')['Tot Enrl']
+                            .sum()
+                            .sort_values(ascending=False)
+                            .reset_index()
+                        )
+
+                        st.dataframe(enrollment_by_location, use_container_width=True)
+
+                        st.bar_chart(enrollment_by_location.set_index('Location'))
+                    else:
+                        st.info("No 'Location' column found in your data to show campus-wise enrollment.")

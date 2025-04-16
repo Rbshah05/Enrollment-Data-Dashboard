@@ -19,7 +19,6 @@ with tab1:
             if not required_cols.issubset(df.columns):
                 st.error("CSV must include 'SOC Class Nbr' and 'Name' columns.")
             else:
-                # ✂️ Filter out unwanted 'Descr' values
                 unwanted_descrs = {
                     "SHORT TERM/DURATION INTERNSHIP",
                     "Engr Internship",
@@ -113,7 +112,7 @@ with tab2:
 
                     # ----------- Enrollment by Campus Section ------------
                     if 'Location' in course_df.columns:
-                        st.markdown("### 📍 Enrollment by Campus (Location)")
+                        st.markdown("### Enrollment by Campus")
 
                         # Clean numeric enrollment values
                         course_df['Tot Enrl'] = pd.to_numeric(course_df['Tot Enrl'], errors='coerce')

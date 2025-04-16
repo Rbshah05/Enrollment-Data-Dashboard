@@ -7,7 +7,6 @@ st.title("📊 Enrollment Data Dashboard")
 # Use tabs to split functionality
 tab1, tab2 = st.tabs(["Upload Data", "Search Open Sections"])
 
-
 with tab1:
     st.header("Upload Enrollment Data")
     uploaded_file = st.file_uploader("Upload a CSV File", type=["csv"])
@@ -20,6 +19,24 @@ with tab1:
             if not required_cols.issubset(df.columns):
                 st.error("CSV must include 'SOC Class Nbr' and 'Name' columns.")
             else:
+                # ✂️ Filter out unwanted 'Descr' values
+                unwanted_descrs = {
+                    "SHORT TERM/DURATION INTERNSHIP",
+                    "Engr Internship",
+                    "Engr Intern",
+                    "Engr Intl Intern",
+                    "Engr Coop",
+                    "Engr Intl Coop",
+                    "Research Projects",
+                    "Master's Research",
+                    "Thesis Research",
+                    "D.Eng. Praxis Research",
+                    "Engineering Research Methods"
+                }
+
+                if "Descr" in df.columns:
+                    df = df[~df['Descr'].isin(unwanted_descrs)]
+
                 # Combine names for duplicate SOC Class Nbr values
                 merged_names = df.groupby('SOC Class Nbr')['Name'].apply(
                     lambda names: ', '.join(str(name) for name in names if pd.notna(name))
@@ -41,6 +58,7 @@ with tab1:
 
         except Exception as e:
             st.error(f"Error processing the file: {e}")
+
 
 
 with tab2:

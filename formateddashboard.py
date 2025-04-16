@@ -61,7 +61,7 @@ with tab1:
 
 
 with tab2:
-    st.header("Find Open Course Sections")
+    st.header("Select a Course")
 
     final_df = st.session_state.get('cleaned_df')
 

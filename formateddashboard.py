@@ -59,7 +59,6 @@ with tab1:
             st.error(f"Error processing the file: {e}")
 
 
-
 with tab2:
     st.header("Select a Course")
 
@@ -73,13 +72,17 @@ with tab2:
             st.error(f"Uploaded CSV must include these columns: {', '.join(required_search_cols)}")
         else:
             subject_options = sorted(final_df['Subject'].dropna().unique())
-            selected_subject = st.selectbox("Select Subject", subject_options)
+            subject_options_with_placeholder = ["Select a subject"] + subject_options
+            selected_subject = st.selectbox("Select Subject", subject_options_with_placeholder)
 
-            if selected_subject:
-                course_nums = sorted(final_df[final_df['Subject'] == selected_subject]['Num'].dropna().unique())
-                selected_num = st.selectbox("Select Course Number", course_nums)
+            if selected_subject != "Select a subject":
+                course_nums = sorted(
+                    final_df[final_df['Subject'] == selected_subject]['Num'].dropna().unique()
+                )
+                course_nums_with_placeholder = ["Select a course number"] + course_nums
+                selected_num = st.selectbox("Select Course Number", course_nums_with_placeholder)
 
-                if selected_num:
+                if selected_num != "Select a course number":
                     course_df = final_df[
                         (final_df['Subject'] == selected_subject) &
                         (final_df['Num'] == selected_num)

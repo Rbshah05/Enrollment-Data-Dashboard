@@ -57,8 +57,6 @@ with tab1:
 
         except Exception as e:
             st.error(f"Error processing the file: {e}")
-
-
 with tab2:
     st.header("Select a Course")
 
@@ -105,6 +103,7 @@ with tab2:
                                     st.markdown(f"**Course Description:** {row.get('Descr', 'N/A')}")
                                     st.markdown(f"**Start Time:** {row.get('Begin Time', 'N/A')}")
                                     st.markdown(f"**End Time:** {row.get('End Time', 'N/A')}")
+                                    st.markdown(f"**Location:** {row.get('Location', 'N/A')}")
 
                                 with col2:
                                     st.markdown(f"**Instructors:** {row.get('Name', 'N/A')}")

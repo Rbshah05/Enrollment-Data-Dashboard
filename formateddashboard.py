@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
 st.title("📊 Enrollment Data Dashboard")
@@ -113,6 +115,7 @@ with tab2:
                         st.warning("No open sections found for this course.")
 
                     # ----------- Enrollment by Campus Section ------------
+                                        
                     if 'Location' in course_df.columns:
                         st.markdown("### Enrollment by Campus")
 
@@ -126,8 +129,19 @@ with tab2:
                             .reset_index()
                         )
 
+                        # Display table
                         st.dataframe(enrollment_by_location, use_container_width=True)
 
-                        st.bar_chart(enrollment_by_location.set_index('Location'))
+                        # Create a smaller bar chart
+                        fig, ax = plt.subplots(figsize=(6, 3))  # adjust width and height
+                        ax.bar(enrollment_by_location['Location'], enrollment_by_location['Tot Enrl'], color="#4a90e2")
+                        ax.set_xlabel("Location")
+                        ax.set_ylabel("Total Enrolled")
+                        ax.set_title("Enrollment by Campus")
+                        plt.xticks(rotation=45, ha='right')
+                        plt.tight_layout()
+
+                        st.pyplot(fig)
                     else:
                         st.info("No 'Location' column found in your data to show campus-wise enrollment.")
+

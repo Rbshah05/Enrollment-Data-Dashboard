@@ -126,13 +126,8 @@ with tab2:
                             .reset_index()
                         )
 
-                        col_table, col_chart = st.columns([2, 1])  # Wider table, smaller chart
+                        st.dataframe(enrollment_by_location, use_container_width=True)
 
-                        with col_table:
-                            st.dataframe(enrollment_by_location, use_container_width=True)
-
-                        with col_chart:
-                            st.markdown("#### ")
-                            st.bar_chart(enrollment_by_location.set_index('Location'), use_container_width=True)
+                        st.bar_chart(enrollment_by_location.set_index('Location'))
                     else:
                         st.info("No 'Location' column found in your data to show campus-wise enrollment.")

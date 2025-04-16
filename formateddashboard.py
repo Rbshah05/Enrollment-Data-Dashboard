@@ -7,7 +7,7 @@ st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
 st.title("📊 Enrollment Data Dashboard")
 
 # Use tabs to split functionality
-tab1, tab2 = st.tabs(["Upload Data", "Search Open Sections"])
+tab1, tab2, tab3 = st.tabs(["Upload Data", "Search Open Sections", "Section-Level View"])
 
 with tab1:
     st.header("Upload Enrollment Data")
@@ -132,16 +132,61 @@ with tab2:
                         # Display table
                         st.dataframe(enrollment_by_location, use_container_width=True)
 
-                        # Create a smaller bar chart
-                        fig, ax = plt.subplots(figsize=(6, 3))  # adjust width and height
-                        ax.bar(enrollment_by_location['Location'], enrollment_by_location['Tot Enrl'], color="#4a90e2")
-                        ax.set_xlabel("Location")
-                        ax.set_ylabel("Total Enrolled")
-                        ax.set_title("Enrollment by Campus")
-                        plt.xticks(rotation=45, ha='right')
-                        plt.tight_layout()
-
-                        st.pyplot(fig)
                     else:
                         st.info("No 'Location' column found in your data to show campus-wise enrollment.")
 
+with tab3:
+    st.header("🔍 Section-Level Enrollment View")
+
+    final_df = st.session_state.get('cleaned_df')
+
+    if final_df is None:
+        st.warning("Please upload a CSV file in the first tab.")
+    elif not {'SOC Class Nbr', 'Subject', 'Num', 'Tot Enrl', 'Enr Cpcty', 'Wait Tot Enrl', 'Wait Cap', 'Location'}.issubset(final_df.columns):
+        st.error("Uploaded CSV must include 'SOC Class Nbr', 'Subject', 'Num', 'Tot Enrl', 'Enr Cpcty', 'Wait Tot Enrl', 'Wait Cap', and 'Location'.")
+    else:
+        subject_options_sec = sorted(final_df['Subject'].dropna().unique())
+        selected_subject_sec = st.selectbox("Select Subject", subject_options_sec, key="subject_sec")
+
+        if selected_subject_sec:
+            course_nums_sec = sorted(final_df[final_df['Subject'] == selected_subject_sec]['Num'].dropna().unique())
+            selected_num_sec = st.selectbox("Select Course Number", course_nums_sec, key="num_sec")
+
+            if selected_num_sec:
+                section_df = final_df[
+                    (final_df['Subject'] == selected_subject_sec) &
+                    (final_df['Num'] == selected_num_sec)
+                ]
+
+                section_ids = sorted(section_df['SOC Class Nbr'].dropna().unique())
+                selected_section = st.selectbox("Select Section (Class Nbr)", section_ids, key="class_nbr_sec")
+
+                if selected_section:
+                    section_info = section_df[section_df['SOC Class Nbr'] == selected_section]
+
+                    st.subheader(f"📘 Enrollment Details for Section {selected_section}")
+
+                    for idx, row in section_info.iterrows():
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown(f"**Course Description:** {row.get('Descr', 'N/A')}")
+                            st.markdown(f"**Location (Campus):** {row.get('Location', 'N/A')}")
+                            st.markdown(f"**Total Enrolled:** {row.get('Tot Enrl', 'N/A')}")
+                            st.markdown(f"**Enrollment Capacity:** {row.get('Enr Cpcty', 'N/A')}")
+
+                        with col2:
+                            st.markdown(f"**Waitlist Total Enrolled:** {row.get('Wait Tot Enrl', 'N/A')}")
+                            st.markdown(f"**Waitlist Capacity:** {row.get('Wait Cap', 'N/A')}")
+                            st.markdown(f"**Instructor(s):** {row.get('Name', 'N/A')}")
+
+                    # Breakdown of enrollments by campus for this course (across all sections)
+                    st.markdown("#### 🏫 Campus Breakdown for This Course")
+
+                    campus_breakdown = (
+                        section_df.groupby('Location')[['Tot Enrl', 'Enr Cpcty', 'Wait Tot Enrl', 'Wait Cap']]
+                        .sum()
+                        .sort_values(by='Tot Enrl', ascending=False)
+                        .reset_index()
+                    )
+
+                    st.dataframe(campus_breakdown, use_container_width=True)

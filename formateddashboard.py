@@ -136,7 +136,7 @@ with tab2:
                         st.info("No 'Location' column found in your data to show campus-wise enrollment.")
 
 with tab3:
-    st.header("🔍 Section-Level Enrollment View")
+    st.header("Section-Level Enrollment View")
 
     final_df = st.session_state.get('cleaned_df')
 
@@ -165,7 +165,7 @@ with tab3:
                 if selected_section:
                     section_info = course_df[course_df['SOC Class Nbr'] == selected_section]
 
-                    st.subheader(f"📘 Enrollment Details for Section {selected_section}")
+                    st.subheader(f"Enrollment Details for Section {selected_section}")
 
                     for idx, row in section_info.iterrows():
                         col1, col2 = st.columns(2)
@@ -182,7 +182,7 @@ with tab3:
                             st.markdown(f"**Waitlist Capacity:** {row.get('Wait Cap')}")
 
                     # 📊 Breakdown by Campus for the course (all sections)
-                    st.markdown("#### 🏫 Campus Breakdown Across All Sections of This Course")
+                    st.markdown("#### Campus Breakdown Across All Sections of This Course")
 
                     campus_breakdown = (
                         course_df.groupby(['Campus', 'Location'])[['Tot Enrl', 'Enr Cpcty', 'Wait Tot', 'Wait Cap']]

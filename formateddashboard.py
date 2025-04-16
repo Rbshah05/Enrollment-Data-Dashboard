@@ -142,8 +142,9 @@ with tab3:
 
     if final_df is None:
         st.warning("Please upload a CSV file in the first tab.")
-    elif not {'SOC Class Nbr', 'Subject', 'Num', 'Tot Enrl', 'Enr Cpcty', 'Wait Tot Enrl', 'Wait Cap', 'Location'}.issubset(final_df.columns):
-        st.error("Uploaded CSV must include 'SOC Class Nbr', 'Subject', 'Num', 'Tot Enrl', 'Enr Cpcty', 'Wait Tot Enrl', 'Wait Cap', and 'Location'.")
+    elif not {'SOC Class Nbr', 'Subject', 'Num', 'Section', 'Descr', 'Campus', 'Location',
+              'Tot Enrl', 'Enr Cpcty', 'Wait Tot', 'Wait Cap', 'Name'}.issubset(final_df.columns):
+        st.error("Uploaded CSV must include all required columns.")
     else:
         subject_options_sec = sorted(final_df['Subject'].dropna().unique())
         selected_subject_sec = st.selectbox("Select Subject", subject_options_sec, key="subject_sec")
@@ -153,37 +154,38 @@ with tab3:
             selected_num_sec = st.selectbox("Select Course Number", course_nums_sec, key="num_sec")
 
             if selected_num_sec:
-                section_df = final_df[
+                course_df = final_df[
                     (final_df['Subject'] == selected_subject_sec) &
                     (final_df['Num'] == selected_num_sec)
                 ]
 
-                section_ids = sorted(section_df['SOC Class Nbr'].dropna().unique())
+                section_ids = sorted(course_df['SOC Class Nbr'].dropna().unique())
                 selected_section = st.selectbox("Select Section (Class Nbr)", section_ids, key="class_nbr_sec")
 
                 if selected_section:
-                    section_info = section_df[section_df['SOC Class Nbr'] == selected_section]
+                    section_info = course_df[course_df['SOC Class Nbr'] == selected_section]
 
                     st.subheader(f"📘 Enrollment Details for Section {selected_section}")
 
                     for idx, row in section_info.iterrows():
                         col1, col2 = st.columns(2)
                         with col1:
-                            st.markdown(f"**Course Description:** {row.get('Descr', 'N/A')}")
-                            st.markdown(f"**Location (Campus):** {row.get('Location', 'N/A')}")
-                            st.markdown(f"**Total Enrolled:** {row.get('Tot Enrl', 'N/A')}")
-                            st.markdown(f"**Enrollment Capacity:** {row.get('Enr Cpcty', 'N/A')}")
-
+                            st.markdown(f"**Course:** {row.get('Subject')} {row.get('Num')} - {row.get('Section')}")
+                            st.markdown(f"**Course Title:** {row.get('Descr')}")
+                            st.markdown(f"**Campus:** {row.get('Campus')}")
+                            st.markdown(f"**Location:** {row.get('Location')}")
+                            st.markdown(f"**Instructor:** {row.get('Name')}")
                         with col2:
-                            st.markdown(f"**Waitlist Total Enrolled:** {row.get('Wait Tot Enrl', 'N/A')}")
-                            st.markdown(f"**Waitlist Capacity:** {row.get('Wait Cap', 'N/A')}")
-                            st.markdown(f"**Instructor(s):** {row.get('Name', 'N/A')}")
+                            st.markdown(f"**Total Enrolled:** {row.get('Tot Enrl')}")
+                            st.markdown(f"**Enrollment Capacity:** {row.get('Enr Cpcty')}")
+                            st.markdown(f"**Waitlist Total:** {row.get('Wait Tot')}")
+                            st.markdown(f"**Waitlist Capacity:** {row.get('Wait Cap')}")
 
-                    # Breakdown of enrollments by campus for this course (across all sections)
-                    st.markdown("#### 🏫 Campus Breakdown for This Course")
+                    # 📊 Breakdown by Campus for the course (all sections)
+                    st.markdown("#### 🏫 Campus Breakdown Across All Sections of This Course")
 
                     campus_breakdown = (
-                        section_df.groupby('Location')[['Tot Enrl', 'Enr Cpcty', 'Wait Tot Enrl', 'Wait Cap']]
+                        course_df.groupby(['Campus', 'Location'])[['Tot Enrl', 'Enr Cpcty', 'Wait Tot', 'Wait Cap']]
                         .sum()
                         .sort_values(by='Tot Enrl', ascending=False)
                         .reset_index()

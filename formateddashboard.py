@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import io
-
 
 
 st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
@@ -11,24 +9,17 @@ st.title("📊 Enrollment Data Dashboard")
 # Use tabs to split functionality
 tab1, tab2, tab3, tab4 = st.tabs(["Upload Data", "Search Open Sections", "Section-Level View", "DLC Course Data"])
 
-
 with tab1:
     st.header("Upload Enrollment Data")
-    uploaded_file = st.file_uploader("Upload a CSV or Excel File", type=["csv", "xlsx", "xls"])
+    uploaded_file = st.file_uploader("Upload a CSV File", type=["csv"])
 
     if uploaded_file is not None:
         try:
-            # Try to read it first as CSV
-            try:
-                df = pd.read_csv(uploaded_file)
-            except Exception:
-                # If CSV fails, try Excel
-                uploaded_file.seek(0)  # Reset file pointer to the beginning
-                df = pd.read_excel(uploaded_file, engine='openpyxl')
+            df = pd.read_csv(uploaded_file)
 
             required_cols = {'SOC Class Nbr', 'Name'}
             if not required_cols.issubset(df.columns):
-                st.error("File must include 'SOC Class Nbr' and 'Name' columns.")
+                st.error("CSV must include 'SOC Class Nbr' and 'Name' columns.")
             else:
                 unwanted_descrs = {
                     "SHORT TERM/DURATION INTERNSHIP",
@@ -47,26 +38,27 @@ with tab1:
                 if "Descr" in df.columns:
                     df = df[~df['Descr'].isin(unwanted_descrs)]
 
+                # Combine names for duplicate SOC Class Nbr values
                 merged_names = df.groupby('SOC Class Nbr')['Name'].apply(
                     lambda names: ', '.join(str(name) for name in names if pd.notna(name))
                 ).reset_index()
 
+                # Keep the first of each duplicated SOC Class Nbr and drop old Name
                 deduped_df = df.drop_duplicates(subset='SOC Class Nbr', keep='first').copy()
                 final_df = pd.merge(deduped_df.drop(columns=['Name']), merged_names, on='SOC Class Nbr')
 
                 st.subheader("Preview of Cleaned Data")
                 st.dataframe(final_df, use_container_width=True)
 
+                # Make CSV downloadable
                 csv = final_df.to_csv(index=False).encode('utf-8')
                 st.download_button("Download Cleaned CSV", data=csv, file_name="cleaned_schedule.csv", mime="text/csv")
 
+                # Store cleaned data in session state
                 st.session_state['cleaned_df'] = final_df
 
         except Exception as e:
             st.error(f"Error processing the file: {e}")
-
-
-
 with tab2:
     st.header("Select a Course")
 

@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
 st.title("📊 Enrollment Data Dashboard")
 
@@ -11,15 +10,19 @@ tab1, tab2, tab3, tab4 = st.tabs(["Upload Data", "Search Open Sections", "Sectio
 
 with tab1:
     st.header("Upload Enrollment Data")
-    uploaded_file = st.file_uploader("Upload a CSV File", type=["csv"])
+    uploaded_file = st.file_uploader("Upload a CSV or Excel File", type=["csv", "xlsx"])
 
     if uploaded_file is not None:
         try:
-            df = pd.read_csv(uploaded_file)
+            # Check the file extension and read accordingly
+            if uploaded_file.name.endswith('.csv'):
+                df = pd.read_csv(uploaded_file)
+            elif uploaded_file.name.endswith('.xlsx'):
+                df = pd.read_excel(uploaded_file)
 
             required_cols = {'SOC Class Nbr', 'Name'}
             if not required_cols.issubset(df.columns):
-                st.error("CSV must include 'SOC Class Nbr' and 'Name' columns.")
+                st.error("File must include 'SOC Class Nbr' and 'Name' columns.")
             else:
                 unwanted_descrs = {
                     "SHORT TERM/DURATION INTERNSHIP",
@@ -59,17 +62,18 @@ with tab1:
 
         except Exception as e:
             st.error(f"Error processing the file: {e}")
+            
 with tab2:
     st.header("Select a Course")
 
     final_df = st.session_state.get('cleaned_df')
 
     if final_df is None:
-        st.warning("Please upload a CSV file in the first tab.")
+        st.warning("Please upload a file in the first tab.")
     else:
         required_search_cols = {'Subject', 'Num', 'Tot Enrl', 'Enr Cpcty', 'Descr', 'Begin Time', 'End Time'}
         if not required_search_cols.issubset(final_df.columns):
-            st.error(f"Uploaded CSV must include these columns: {', '.join(required_search_cols)}")
+            st.error(f"Uploaded file must include these columns: {', '.join(required_search_cols)}")
         else:
             subject_options = sorted(final_df['Subject'].dropna().unique())
             subject_options_with_placeholder = ["Select a subject"] + subject_options
@@ -134,6 +138,7 @@ with tab2:
 
                     else:
                         st.info("No 'Location' column found in your data to show campus-wise enrollment.")
+
 
 with tab3:
     st.header("Section-Level Enrollment View")

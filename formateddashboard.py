@@ -7,7 +7,7 @@ st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
 st.title("📊 Enrollment Data Dashboard")
 
 # Use tabs to split functionality
-tab1, tab2, tab3 = st.tabs(["Upload Data", "Search Open Sections", "Section-Level View"])
+tab1, tab2, tab3, tab4 = st.tabs(["Upload Data", "Search Open Sections", "Section-Level View", "DLC Courses"])
 
 with tab1:
     st.header("Upload Enrollment Data")
@@ -192,3 +192,52 @@ with tab3:
                     )
 
                     st.dataframe(campus_breakdown, use_container_width=True)
+with tab4:
+    st.header("View DLC Courses (Sections with 'V')")
+
+    final_df = st.session_state.get('cleaned_df')
+
+    if final_df is None:
+        st.warning("Please upload a CSV file in the first tab.")
+    elif not {'Subject', 'Num', 'Section', 'Location', 'Tot Enrl', 'Enr Cpcty', 'Wait Tot', 'Wait Cap'}.issubset(final_df.columns):
+        st.error("Uploaded CSV must include all required columns for this view.")
+    else:
+        # Filter to sections that have a "V" in the Section
+        dlc_df = final_df[final_df['Section'].str.contains('V', na=False)]
+
+        if dlc_df.empty:
+            st.info("No courses with 'V' sections found.")
+        else:
+            # Get unique course numbers that have a V section
+            dlc_courses = dlc_df[['Subject', 'Num']].drop_duplicates()
+            dlc_courses['Course'] = dlc_courses['Subject'] + " " + dlc_courses['Num']
+
+            selected_course = st.selectbox("Select a DLC Course", ["Select a course"] + dlc_courses['Course'].tolist())
+
+            if selected_course != "Select a course":
+                selected_subject, selected_num = selected_course.split()
+
+                selected_course_df = dlc_df[
+                    (dlc_df['Subject'] == selected_subject) &
+                    (dlc_df['Num'] == selected_num)
+                ]
+
+                if selected_course_df.empty:
+                    st.warning("No data available for the selected course.")
+                else:
+                    st.subheader(f"Enrollment Summary for {selected_course}")
+
+                    # Sum the columns across all 'V' sections
+                    summary = selected_course_df[['Enr Cpcty', 'Tot Enrl', 'Wait Cap', 'Wait Tot']].apply(pd.to_numeric, errors='coerce').sum()
+
+                    st.metric("Total Enrollment Capacity", int(summary['Enr Cpcty']))
+                    st.metric("Total Enrolled", int(summary['Tot Enrl']))
+                    st.metric("Total Waitlist Capacity", int(summary['Wait Cap']))
+                    st.metric("Total on Waitlist", int(summary['Wait Tot']))
+
+                    st.divider()
+
+                    # Show detailed table: section and location level
+                    st.subheader("Section and Location Breakdown")
+                    detailed_table = selected_course_df[['Section', 'Location', 'Enr Cpcty', 'Tot Enrl', 'Wait Cap', 'Wait Tot']]
+                    st.dataframe(detailed_table, use_container_width=True)

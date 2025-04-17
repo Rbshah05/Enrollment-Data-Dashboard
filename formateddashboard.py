@@ -15,11 +15,11 @@ with tab1:
 
     if uploaded_file is not None:
         try:
-            # Determine file type
+            # Detect file type
             if uploaded_file.name.endswith('.csv'):
                 df = pd.read_csv(uploaded_file)
             elif uploaded_file.name.endswith('.xlsx'):
-                df = pd.read_excel(uploaded_file)
+                df = pd.read_excel(uploaded_file, engine='openpyxl')
             else:
                 st.error("Unsupported file type. Please upload a CSV or XLSX file.")
                 st.stop()
@@ -45,27 +45,24 @@ with tab1:
                 if "Descr" in df.columns:
                     df = df[~df['Descr'].isin(unwanted_descrs)]
 
-                # Combine names for duplicate SOC Class Nbr values
                 merged_names = df.groupby('SOC Class Nbr')['Name'].apply(
                     lambda names: ', '.join(str(name) for name in names if pd.notna(name))
                 ).reset_index()
 
-                # Keep the first of each duplicated SOC Class Nbr and drop old Name
                 deduped_df = df.drop_duplicates(subset='SOC Class Nbr', keep='first').copy()
                 final_df = pd.merge(deduped_df.drop(columns=['Name']), merged_names, on='SOC Class Nbr')
 
                 st.subheader("Preview of Cleaned Data")
                 st.dataframe(final_df, use_container_width=True)
 
-                # Make CSV downloadable
                 csv = final_df.to_csv(index=False).encode('utf-8')
                 st.download_button("Download Cleaned CSV", data=csv, file_name="cleaned_schedule.csv", mime="text/csv")
 
-                # Store cleaned data in session state
                 st.session_state['cleaned_df'] = final_df
 
         except Exception as e:
             st.error(f"Error processing the file: {e}")
+
 
 with tab2:
     st.header("Select a Course")

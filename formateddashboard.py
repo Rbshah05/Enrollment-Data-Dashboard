@@ -7,7 +7,7 @@ st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
 st.title("📊 Enrollment Data Dashboard")
 
 # Use tabs to split functionality
-tab1, tab2, tab3, tab4 = st.tabs(["Upload Data", "Search Open Sections", "Section-Level View", "DLC Courses"])
+tab1, tab2, tab3, tab4 = st.tabs(["Upload Data", "Search Open Sections", "Section-Level View", "DLC Course Data"])
 
 with tab1:
     st.header("Upload Enrollment Data")
@@ -193,7 +193,7 @@ with tab3:
 
                     st.dataframe(campus_breakdown, use_container_width=True)
 with tab4:
-    st.header("View DLC Courses (Sections with 'V')")
+    st.header("View DLC Courses")
 
     final_df = st.session_state.get('cleaned_df')
 

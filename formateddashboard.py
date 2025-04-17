@@ -203,23 +203,25 @@ with tab4:
         st.error("Uploaded CSV must include all required columns for this view.")
     else:
         # Filter to sections that have a "V" in the Section
-        dlc_df = final_df[final_df['Section'].str.contains('V', na=False)]
+        dlc_df = final_df[final_df['Section'].astype(str).str.contains('V', na=False)]
 
         if dlc_df.empty:
             st.info("No courses with 'V' sections found.")
         else:
             # Get unique course numbers that have a V section
             dlc_courses = dlc_df[['Subject', 'Num']].drop_duplicates()
-            dlc_courses['Course'] = dlc_courses['Subject'] + " " + dlc_courses['Num']
+            dlc_courses['Course'] = dlc_courses['Subject'].astype(str).str.strip() + " " + dlc_courses['Num'].astype(str).str.strip()
 
             selected_course = st.selectbox("Select a DLC Course", ["Select a course"] + dlc_courses['Course'].tolist())
 
             if selected_course != "Select a course":
-                selected_subject, selected_num = selected_course.split()
+                # Instead of simple split, use the dataframe to match
+                selected_subject = selected_course.split(' ')[0]
+                selected_num = ' '.join(selected_course.split(' ')[1:])
 
                 selected_course_df = dlc_df[
-                    (dlc_df['Subject'] == selected_subject) &
-                    (dlc_df['Num'] == selected_num)
+                    (dlc_df['Subject'].astype(str).str.strip() == selected_subject) &
+                    (dlc_df['Num'].astype(str).str.strip() == selected_num)
                 ]
 
                 if selected_course_df.empty:

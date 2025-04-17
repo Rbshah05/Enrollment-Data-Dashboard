@@ -11,15 +11,22 @@ tab1, tab2, tab3, tab4 = st.tabs(["Upload Data", "Search Open Sections", "Sectio
 
 with tab1:
     st.header("Upload Enrollment Data")
-    uploaded_file = st.file_uploader("Upload a CSV File", type=["csv"])
+    uploaded_file = st.file_uploader("Upload a CSV or Excel File", type=["csv", "xlsx"])
 
     if uploaded_file is not None:
         try:
-            df = pd.read_csv(uploaded_file)
+            # Determine file type
+            if uploaded_file.name.endswith('.csv'):
+                df = pd.read_csv(uploaded_file)
+            elif uploaded_file.name.endswith('.xlsx'):
+                df = pd.read_excel(uploaded_file)
+            else:
+                st.error("Unsupported file type. Please upload a CSV or XLSX file.")
+                st.stop()
 
             required_cols = {'SOC Class Nbr', 'Name'}
             if not required_cols.issubset(df.columns):
-                st.error("CSV must include 'SOC Class Nbr' and 'Name' columns.")
+                st.error("File must include 'SOC Class Nbr' and 'Name' columns.")
             else:
                 unwanted_descrs = {
                     "SHORT TERM/DURATION INTERNSHIP",
@@ -59,6 +66,7 @@ with tab1:
 
         except Exception as e:
             st.error(f"Error processing the file: {e}")
+
 with tab2:
     st.header("Select a Course")
 

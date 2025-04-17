@@ -239,7 +239,22 @@ with tab4:
 
                     st.divider()
 
-                    # Show detailed table: section and location level
+                   # Show detailed table: section and location level
                     st.subheader("Section and Location Breakdown")
                     detailed_table = selected_course_df[['Section', 'Location', 'Enr Cpcty', 'Tot Enrl', 'Wait Cap', 'Wait Tot']]
+
+                    # Create a total row
+                    total_row = {
+                        'Section': 'TOTAL',
+                        'Location': '',
+                        'Enr Cpcty': detailed_table['Enr Cpcty'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Tot Enrl': detailed_table['Tot Enrl'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Wait Cap': detailed_table['Wait Cap'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Wait Tot': detailed_table['Wait Tot'].apply(pd.to_numeric, errors='coerce').sum(),
+                    }
+
+                    # Append the total row
+                    detailed_table = pd.concat([detailed_table, pd.DataFrame([total_row])], ignore_index=True)
+
                     st.dataframe(detailed_table, use_container_width=True)
+

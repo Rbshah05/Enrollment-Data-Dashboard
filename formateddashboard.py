@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import io
+
 
 
 st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
@@ -9,20 +11,20 @@ st.title("📊 Enrollment Data Dashboard")
 # Use tabs to split functionality
 tab1, tab2, tab3, tab4 = st.tabs(["Upload Data", "Search Open Sections", "Section-Level View", "DLC Course Data"])
 
+
 with tab1:
     st.header("Upload Enrollment Data")
-    uploaded_file = st.file_uploader("Upload a CSV or Excel File", type=["csv", "xlsx"])
+    uploaded_file = st.file_uploader("Upload a CSV or Excel File", type=["csv", "xlsx", "xls"])
 
     if uploaded_file is not None:
         try:
-            # Detect file type
-            if uploaded_file.name.endswith('.csv'):
+            # Try to read it first as CSV
+            try:
                 df = pd.read_csv(uploaded_file)
-            elif uploaded_file.name.endswith('.xlsx'):
+            except Exception:
+                # If CSV fails, try Excel
+                uploaded_file.seek(0)  # Reset file pointer to the beginning
                 df = pd.read_excel(uploaded_file, engine='openpyxl')
-            else:
-                st.error("Unsupported file type. Please upload a CSV or XLSX file.")
-                st.stop()
 
             required_cols = {'SOC Class Nbr', 'Name'}
             if not required_cols.issubset(df.columns):
@@ -62,6 +64,7 @@ with tab1:
 
         except Exception as e:
             st.error(f"Error processing the file: {e}")
+
 
 
 with tab2:

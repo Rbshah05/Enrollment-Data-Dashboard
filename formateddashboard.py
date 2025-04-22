@@ -232,15 +232,22 @@ with tab4:
                 if selected_course_df.empty:
                     st.warning("No data available for the selected course.")
                 else:
+                    
                     st.subheader(f"Enrollment Summary for {selected_course}")
 
                     # Sum the columns across all 'V' sections
                     summary = selected_course_df[['Enr Cpcty', 'Tot Enrl', 'Wait Cap', 'Wait Tot']].apply(pd.to_numeric, errors='coerce').sum()
-
+                    st.markdown(
+                        f"""
+                        <h3 style='margin-bottom: 0;'>Total Enrolled</h3>
+                        <h1 style='margin-top: 0;'>{int(summary['Tot Enrl'])}</h1>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                    #st.metric("Total Enrolled", int(summary['Tot Enrl']))
                     st.metric("Total Enrollment Capacity", int(summary['Enr Cpcty']))
-                    st.metric("Total Enrolled", int(summary['Tot Enrl']))
-                    st.metric("Total Waitlist Capacity", int(summary['Wait Cap']))
                     st.metric("Total on Waitlist", int(summary['Wait Tot']))
+                    st.metric("Total Waitlist Capacity", int(summary['Wait Cap']))
 
                     st.divider()
 

@@ -239,7 +239,7 @@ with tab4:
                     summary = selected_course_df[['Enr Cpcty', 'Tot Enrl', 'Wait Cap', 'Wait Tot']].apply(pd.to_numeric, errors='coerce').sum()
                     st.markdown(
                         f"""
-                        <h3 style='text-align: center;'>Total Enrolled — {int(summary['Tot Enrl'])}</h3>
+                        <h3 style='margin-bottom: 0;'>{'Total Enrolled —'} {int(summary['Tot Enrl'])}</h3>
                         """,
                         unsafe_allow_html=True
                     )

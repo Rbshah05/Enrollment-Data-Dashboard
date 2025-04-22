@@ -250,28 +250,12 @@ with tab4:
 
                     st.divider()
 
-                   # Show detailed table: section and location level
-                    st.subheader("Section and Location Breakdown")
+                    # Show available seats before detailed table
+                    st.subheader("Available Seats by Location")
+
                     detailed_table = selected_course_df[['Section', 'Location', 'Enr Cpcty', 'Tot Enrl', 'Wait Cap', 'Wait Tot']]
 
-                    # Create a total row
-                    total_row = {
-                        'Section': 'TOTAL',
-                        'Location': '',
-                        'Tot Enrl': detailed_table['Tot Enrl'].apply(pd.to_numeric, errors='coerce').sum(),
-                        'Enr Cpcty': detailed_table['Enr Cpcty'].apply(pd.to_numeric, errors='coerce').sum(),
-                        'Wait Tot': detailed_table['Wait Tot'].apply(pd.to_numeric, errors='coerce').sum(),
-                        'Wait Cap': detailed_table['Wait Cap'].apply(pd.to_numeric, errors='coerce').sum(),
-
-                    }
-
-                    # Append the total row
-                    detailed_table = pd.concat([detailed_table, pd.DataFrame([total_row])], ignore_index=True)
-
-
-                    # Check for locations with available seats
                     available_seats = []
-
                     for idx, row in detailed_table.iterrows():
                         try:
                             tot_enrl = pd.to_numeric(row['Tot Enrl'], errors='coerce')
@@ -284,11 +268,28 @@ with tab4:
                         except Exception:
                             continue
 
-                    # Display available seats info
                     if available_seats:
-                        st.subheader("Available Seats by Location")
                         for seat_info in available_seats:
                             st.write(seat_info)
-                                       
-                    st.dataframe(detailed_table, use_container_width=True)
+                    else:
+                        st.write("No locations with available seats.")
 
+                    st.divider()
+
+                    # Section and Location Breakdown
+                    st.subheader("Section and Location Breakdown")
+
+                    # Create a total row
+                    total_row = {
+                        'Section': 'TOTAL',
+                        'Location': '',
+                        'Tot Enrl': detailed_table['Tot Enrl'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Enr Cpcty': detailed_table['Enr Cpcty'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Wait Tot': detailed_table['Wait Tot'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Wait Cap': detailed_table['Wait Cap'].apply(pd.to_numeric, errors='coerce').sum(),
+                    }
+
+                    # Append the total row
+                    detailed_table = pd.concat([detailed_table, pd.DataFrame([total_row])], ignore_index=True)
+
+                    st.dataframe(detailed_table, use_container_width=True)

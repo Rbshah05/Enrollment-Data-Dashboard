@@ -258,10 +258,11 @@ with tab4:
                     total_row = {
                         'Section': 'TOTAL',
                         'Location': '',
-                        'Enr Cpcty': detailed_table['Enr Cpcty'].apply(pd.to_numeric, errors='coerce').sum(),
                         'Tot Enrl': detailed_table['Tot Enrl'].apply(pd.to_numeric, errors='coerce').sum(),
-                        'Wait Cap': detailed_table['Wait Cap'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Enr Cpcty': detailed_table['Enr Cpcty'].apply(pd.to_numeric, errors='coerce').sum(),
                         'Wait Tot': detailed_table['Wait Tot'].apply(pd.to_numeric, errors='coerce').sum(),
+                        'Wait Cap': detailed_table['Wait Cap'].apply(pd.to_numeric, errors='coerce').sum(),
+
                     }
 
                     # Append the total row
@@ -269,3 +270,23 @@ with tab4:
 
                     st.dataframe(detailed_table, use_container_width=True)
 
+                    # Check for locations with available seats
+                    available_seats = []
+
+                    for idx, row in detailed_table.iterrows():
+                        try:
+                            tot_enrl = pd.to_numeric(row['Tot Enrl'], errors='coerce')
+                            enr_cpcty = pd.to_numeric(row['Enr Cpcty'], errors='coerce')
+                            location = row['Location']
+
+                            if pd.notnull(tot_enrl) and pd.notnull(enr_cpcty) and (enr_cpcty > tot_enrl) and location != '':
+                                seats_available = int(enr_cpcty - tot_enrl)
+                                available_seats.append(f"{location} has {seats_available} seats available")
+                        except Exception:
+                            continue
+
+                    # Display available seats info
+                    if available_seats:
+                        st.subheader("Available Seats by Location")
+                        for seat_info in available_seats:
+                            st.write(seat_info)

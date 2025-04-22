@@ -268,7 +268,6 @@ with tab4:
                     # Append the total row
                     detailed_table = pd.concat([detailed_table, pd.DataFrame([total_row])], ignore_index=True)
 
-                    st.dataframe(detailed_table, use_container_width=True)
 
                     # Check for locations with available seats
                     available_seats = []
@@ -290,3 +289,6 @@ with tab4:
                         st.subheader("Available Seats by Location")
                         for seat_info in available_seats:
                             st.write(seat_info)
+                                       
+                    st.dataframe(detailed_table, use_container_width=True)
+

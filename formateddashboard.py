@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import openpyxl
 
 st.set_page_config(page_title="Enrollment Dashboard", layout="wide")
 st.title("📊 Enrollment Data Dashboard")

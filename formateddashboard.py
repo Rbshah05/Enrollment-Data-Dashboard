@@ -43,7 +43,7 @@ with tab1:
 
                 # Remove cancelled sections
                 if "Class Stat" in df.columns:
-                    df = df[df['Class Stat'] != "Cancelled Section"]
+                    df = df[df["Class Stat"].str.strip().ne("Cancelled Section")]
 
                 # Combine names for duplicate SOC Class Nbr values
                 merged_names = df.groupby('SOC Class Nbr')['Name'].apply(

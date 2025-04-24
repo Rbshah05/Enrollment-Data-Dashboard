@@ -41,6 +41,10 @@ with tab1:
                 if "Descr" in df.columns:
                     df = df[~df['Descr'].isin(unwanted_descrs)]
 
+                # Remove cancelled sections
+                if "Class Stat" in df.columns:
+                    df = df[df['Class Stat'] != "Cancelled Section"]
+
                 # Combine names for duplicate SOC Class Nbr values
                 merged_names = df.groupby('SOC Class Nbr')['Name'].apply(
                     lambda names: ', '.join(str(name) for name in names if pd.notna(name))
